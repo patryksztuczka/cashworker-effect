@@ -1,0 +1,30 @@
+{
+  "name": "@cashworker/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "wrangler deploy --dry-run --outdir dist",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote"
+  },
+  "dependencies": {
+    "@effect/experimental": "^0.60.0",
+    "drizzle-orm": "^0.45.2",
+    "effect": "^3.21.2",
+    "hono": "^4.12.23"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260525.0",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7",
+    "wrangler": "^4.95.0"
+  }
+}

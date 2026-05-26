@@ -1,0 +1,11 @@
+node_modules
+.turbo
+dist
+coverage
+playwright-report
+test-results
+.wrangler
+.dev.vars
+*.local
+*.tsbuildinfo
+pnpm-debug.log*
