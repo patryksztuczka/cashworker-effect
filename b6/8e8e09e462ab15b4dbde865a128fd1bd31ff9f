@@ -1,0 +1,73 @@
+apps/web/src/routes/app-layout.tsx
+  s_a829bf528ac53a::t_a2fe1128b6040a 9-12,15-16
+apps/backend/drizzle/0001_aromatic_black_tarantula.sql
+  s_a829bf528ac53a::t_94a1be066de5dc 1-45
+apps/web/vite.config.ts
+  s_a829bf528ac53a::t_a2fe1128b6040a 9-11
+apps/backend/test/pko-parser.test.ts
+  s_a829bf528ac53a::t_feccdb2661704f 26-29,38,44
+  s_a829bf528ac53a::t_f7a108347784b4 1-25,30-37,39-43,45-46
+apps/backend/src/services/budget-repository.ts
+  s_a829bf528ac53a::t_2f8290b2935bf0 144,149,154
+  s_a829bf528ac53a::t_551490bf8ca72f 1-2,4-61,63-110,113-140,143,145-148,150-153,155-292,297-334
+  s_a829bf528ac53a::t_de06f3ab3aadd9 3,62
+  s_a829bf528ac53a::t_2e3cf0c885ae3b 111-112,141-142,293-296
+apps/web/src/routes/home.tsx
+  s_a829bf528ac53a::t_a2fe1128b6040a 1-13,15-58,60-62,64-65,67-76,79,82,86-93,95-97,100-138,140-157,160-269,272-290,292-376,378-380,382-397,399-401,404-424,426-460
+  s_a829bf528ac53a::t_16e699b4c7717f 59,66,94,139,425,461
+apps/web/package.json
+  s_a829bf528ac53a::t_a2fe1128b6040a 17
+CONTEXT.md
+  s_a829bf528ac53a::t_69eeff6193154d 23,26-30,54-55,65-67
+  s_a829bf528ac53a::t_f9555016265707 1-10,39-50,57-61,71-74
+  s_a829bf528ac53a::t_30ab75701484eb 24-25
+  s_a829bf528ac53a::t_beab447c28e388 11-22,51-53,62-64,75
+  s_a829bf528ac53a::t_75ee63965aa3a9 31-38,56,68-70
+apps/backend/test/imports.test.ts
+  s_a829bf528ac53a::t_d27fe4771b1ee0 97-106,108-111,113-122,128-131
+  s_a829bf528ac53a::t_8d521b7a7cfec0 40,53
+  s_a829bf528ac53a::t_ef199d57e32f77 123-127
+  s_a829bf528ac53a::t_61d379689a5dd7 95
+  s_a829bf528ac53a::t_ce7baf8389d260 1-3,5-6,21-39,41-52,54-65,132
+  s_a829bf528ac53a::t_099058e150d056 4,7-20,78,93,107,112
+  s_a829bf528ac53a::t_d079f1ba126422 66-77,79-92,94,96
+apps/web/src/routes/home.test.tsx
+  s_a829bf528ac53a::t_a2fe1128b6040a 3,11-72,90-95
+apps/backend/src/services/current-user.ts
+  s_a829bf528ac53a::t_b0ca55f4704ecb 1
+apps/backend/package.json
+  s_a829bf528ac53a::t_a2fe1128b6040a 21-22
+docs/prd-pko-statement-import.md
+  s_a829bf528ac53a::t_9724f5c58c309f 1-129
+apps/backend/src/statements/pko-parser.ts
+  s_a829bf528ac53a::t_2e3cf0c885ae3b 56-57
+  s_a829bf528ac53a::t_65444d86cf9fc0 58-62,68,72-75,117-118,187-188,197,206,215-220,265-274
+  s_a829bf528ac53a::t_39e5bb724e7df9 1-30,34-55,63-67,69-71,76-81,89-116,119-129,171,182-186,189-196,198-205,207-214,221-264,275-291
+  s_a829bf528ac53a::t_3a980a04f26700 86-87
+  s_a829bf528ac53a::t_5b6490f1bc5582 33,84-85,88
+  s_a829bf528ac53a::t_f471bf6ec42ddb 31-32,82-83,130-170,172-181
+apps/backend/src/index.ts
+  s_a829bf528ac53a::t_a2fe1128b6040a 5-7,9,11-13,15,17-18,20-23,25-27,29-95
+apps/backend/src/types/pdfjs-worker.d.ts
+  s_a829bf528ac53a::t_a5483fa322e553 1-3
+apps/web/e2e/app.spec.ts
+  s_a829bf528ac53a::t_a2fe1128b6040a 6-8
+apps/backend/src/db/schema.ts
+  s_a829bf528ac53a::t_a2fe1128b6040a 1,9-70
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "b68e8e09e462ab15b4dbde865a128fd1bd31ff9f",
+  "prompts": {},
+  "sessions": {
+    "s_a829bf528ac53a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e661e-48a4-72b1-ae42-b66e85edce99",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Patryk Sztuczka <patryk.sztuczka00@gmail.com>"
+    }
+  }
+}
