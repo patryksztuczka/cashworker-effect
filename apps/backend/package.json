@@ -18,7 +18,8 @@
     "@effect/experimental": "^0.60.0",
     "drizzle-orm": "^0.45.2",
     "effect": "^3.21.2",
-    "hono": "^4.12.23"
+    "hono": "^4.12.23",
+    "pdfjs-dist": "^5.7.284"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260525.0",
