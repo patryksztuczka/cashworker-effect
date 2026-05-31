@@ -33,12 +33,12 @@ export function createLivePkoStatementParserService(): StatementParserService {
         /Nr:\s*([0-9]+\/[0-9]{4})\s+Data:\s*(\d{2}\.\d{2}\.\d{4})/,
         "statement number",
       );
-      const iban = requireMatch(text, /Nr IBAN:\s*([A-Z]{2}\s*\d{2}(?:\s*\d{4}){6})/, "IBAN").at(
-        1,
-      );
-      const accountProduct = requireMatch(text, /Rodzaj rachunku:\s*([^\n]+)/, "account product").at(
-        1,
-      );
+      const iban = requireMatch(text, /Nr IBAN:\s*([A-Z]{2}\s*\d{2}(?:\s*\d{4}){6})/, "IBAN").at(1);
+      const accountProduct = requireMatch(
+        text,
+        /Rodzaj rachunku:\s*([^\n]+)/,
+        "account product",
+      ).at(1);
       const currency = requireMatch(text, /Waluta rachunku:\s*([A-Z]{3})/, "currency").at(1);
 
       if (!iban || !accountProduct || !currency) {

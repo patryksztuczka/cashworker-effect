@@ -25,10 +25,7 @@ export function createLiveBankAccountService(db: Db): BankAccountsService {
       return Promise.all(
         rows.map(async (account) => {
           const transactionRows = await db.query.transactions.findMany({
-            where: and(
-              eq(transactions.userId, userId),
-              eq(transactions.bankAccountId, account.id),
-            ),
+            where: and(eq(transactions.userId, userId), eq(transactions.bankAccountId, account.id)),
           });
 
           return { ...account, transactionCount: transactionRows.length };
