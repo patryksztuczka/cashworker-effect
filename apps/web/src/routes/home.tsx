@@ -54,6 +54,12 @@ interface ImportResult {
   };
 }
 
+const API_BASE_PATH = "/api/v1";
+
+function apiPath(path: string) {
+  return `${API_BASE_PATH}${path}`;
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url);
 
@@ -68,18 +74,38 @@ async function uploadStatement(file: File): Promise<ImportResult> {
   const body = new FormData();
   body.set("statement", file);
 
-  const response = await fetch("/api/imports", {
+  const response = await fetch(apiPath("/imports"), {
     method: "POST",
     body,
   });
 
-  const payload = (await response.json()) as ImportResult | { error: string };
+  const payload = (await readJsonResponse(response)) as ImportResult | { error: string } | null;
 
   if (!response.ok) {
-    throw new Error("error" in payload ? payload.error : "Statement import failed");
+    throw new Error(
+      payload && "error" in payload ? payload.error : `Statement import failed: ${response.status}`,
+    );
+  }
+
+  if (!payload) {
+    throw new Error("Statement import failed");
   }
 
   return payload as ImportResult;
+}
+
+async function readJsonResponse(response: Response): Promise<unknown> {
+  const text = await response.text();
+
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 export function HomeRoute() {
@@ -90,11 +116,11 @@ export function HomeRoute() {
 
   const accountsQuery = useQuery({
     queryKey: ["accounts"],
-    queryFn: () => fetchJson<{ accounts: Account[] }>("/api/accounts"),
+    queryFn: () => fetchJson<{ accounts: Account[] }>(apiPath("/accounts")),
   });
   const importsQuery = useQuery({
     queryKey: ["imports"],
-    queryFn: () => fetchJson<{ imports: ImportHistoryItem[] }>("/api/imports"),
+    queryFn: () => fetchJson<{ imports: ImportHistoryItem[] }>(apiPath("/imports")),
   });
 
   const accounts = useMemo(
@@ -107,7 +133,7 @@ export function HomeRoute() {
     queryKey: ["transactions", selectedAccount?.id],
     queryFn: () =>
       fetchJson<{ transactions: Transaction[] }>(
-        `/api/accounts/${selectedAccount!.id}/transactions`,
+        apiPath(`/accounts/${selectedAccount!.id}/transactions`),
       ),
     enabled: Boolean(selectedAccount),
   });
