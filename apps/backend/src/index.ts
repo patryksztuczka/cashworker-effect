@@ -1,95 +1,96 @@
 import { Hono } from "hono";
-import { Effect } from "effect";
 
 import { createDb } from "./db/client";
-import type { BudgetRepository } from "./services/budget-repository";
-import { createD1BudgetRepository } from "./services/budget-repository";
-import { currentUserId } from "./services/current-user";
-import { getHealth } from "./services/health";
-import { parsePkoStatementPdf } from "./statements/pko-parser";
+import { createLiveBankAccountService } from "./modules/bank-accounts/bank-account-service";
+import type { BankAccountsService } from "./modules/bank-accounts/interface";
+import { createBankAccountsApp } from "./modules/bank-accounts/routes";
+import { createLiveCurrentUserService } from "./modules/current-user/current-user-service";
+import type { CurrentUserService } from "./modules/current-user/interface";
+import { createLiveHealthService } from "./modules/health/health-service";
+import type { HealthService } from "./modules/health/interface";
+import { createHealthApp } from "./modules/health/routes";
+import type { StatementParserService } from "./modules/parsers/interface";
+import { createLivePkoStatementParserService } from "./modules/parsers/pko-statement-parser-service";
+import type { StatementImportsService } from "./modules/statement-imports/interface";
+import { createStatementImportsApp } from "./modules/statement-imports/routes";
+import { createLiveStatementImportService } from "./modules/statement-imports/statement-import-service";
+import type { TransactionsService } from "./modules/transactions/interface";
+import { createTransactionsApp } from "./modules/transactions/routes";
+import { createLiveTransactionService } from "./modules/transactions/transaction-service";
 
 interface AppOptions {
-  readonly repository?: BudgetRepository;
+  readonly services?: AppServices;
+}
+
+export interface AppServices {
+  readonly bankAccounts: BankAccountsService;
+  readonly currentUser: CurrentUserService;
+  readonly health: HealthService;
+  readonly statementParser: StatementParserService;
+  readonly statementImports: StatementImportsService;
+  readonly transactions: TransactionsService;
 }
 
 type AppEnv = { Bindings: Env };
 
 export function createApp(options: AppOptions = {}) {
   const app = new Hono<AppEnv>();
+  const api = new Hono<AppEnv>();
+  const currentUser = options.services?.currentUser ?? createLiveCurrentUserService();
+  const health = options.services?.health ?? createLiveHealthService();
+  const statementParser =
+    options.services?.statementParser ?? createLivePkoStatementParserService();
 
-  const getRepository = (database?: D1Database): BudgetRepository => {
-    if (options.repository) {
-      return options.repository;
+  const getServices = (database?: D1Database): AppServices => {
+    if (options.services) {
+      return options.services;
     }
 
     if (!database) {
       throw new Error("D1 database binding is required");
     }
 
-    return createD1BudgetRepository(createDb(database));
+    const db = createDb(database);
+    const bankAccounts = createLiveBankAccountService(db);
+    const transactions = createLiveTransactionService(db);
+    const statementImports = createLiveStatementImportService({
+      db,
+      bankAccountsService: bankAccounts,
+      transactionsService: transactions,
+    });
+
+    return { bankAccounts, currentUser, health, statementParser, statementImports, transactions };
   };
 
   app.get("/", (c) => c.text("cashworker backend"));
 
-  app.get("/health", async (c) => {
-    const payload = await Effect.runPromise(getHealth);
+  api.route("/health", createHealthApp({ healthService: health }));
+  api.route(
+    "/imports",
+    createStatementImportsApp({
+      currentUserService: currentUser,
+      statementParserService: statementParser,
+      getStatementImportsService: (database) => getServices(database).statementImports,
+    }),
+  );
+  api.route(
+    "/accounts",
+    createBankAccountsApp({
+      currentUserService: currentUser,
+      getBankAccountsService: (database) => getServices(database).bankAccounts,
+    }),
+  );
+  api.route(
+    "/accounts",
+    createTransactionsApp({
+      currentUserService: currentUser,
+      getTransactionsService: (database) => getServices(database).transactions,
+    }),
+  );
 
-    return c.json(payload);
-  });
-
-  app.get("/api/health", async (c) => {
-    const payload = await Effect.runPromise(getHealth);
-
-    return c.json(payload);
-  });
-
-  app.post("/api/imports", async (c) => {
-    const body = await c.req.parseBody();
-    const file = body.statement;
-
-    if (!(file instanceof File)) {
-      return c.json({ error: "statement PDF is required" }, 400);
-    }
-
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const parsed = await parsePkoStatementPdf(bytes);
-    const result = await getRepository(c.env?.DB).importStatement({
-      userId: currentUserId,
-      fileHash: await hashBytes(bytes),
-      parsed,
-    });
-
-    return c.json(result, result.status === "imported" ? 201 : 200);
-  });
-
-  app.get("/api/accounts", async (c) => {
-    const accounts = await getRepository(c.env?.DB).listAccounts(currentUserId);
-
-    return c.json({ accounts });
-  });
-
-  app.get("/api/accounts/:accountId/transactions", async (c) => {
-    const transactions = await getRepository(c.env?.DB).listTransactions(
-      currentUserId,
-      c.req.param("accountId"),
-    );
-
-    return c.json({ transactions });
-  });
-
-  app.get("/api/imports", async (c) => {
-    const imports = await getRepository(c.env?.DB).listImports(currentUserId);
-
-    return c.json({ imports });
-  });
+  app.route("/api/v1", api);
 
   return app;
-}
-
-async function hashBytes(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-
-  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 const app = createApp();

@@ -1,28 +1,6 @@
-export interface ParsedPkoStatement {
-  readonly account: {
-    readonly bankName: string;
-    readonly iban: string;
-    readonly accountProduct: string;
-    readonly currency: string;
-  };
-  readonly statement: {
-    readonly number: string;
-    readonly issuedAt: string;
-    readonly periodFrom: string;
-    readonly periodTo: string;
-  };
-  readonly transactions: readonly ParsedPkoTransaction[];
-}
-
-export interface ParsedPkoTransaction {
-  readonly operationId: string;
-  readonly bookedAt: string;
-  readonly valuedAt: string;
-  readonly operationType: string;
-  readonly amountMinor: number;
-  readonly balanceAfterMinor: number;
-  readonly description: string;
-}
+import type { ParsedBankStatement } from "../statements/interface";
+import type { TransactionDetails } from "../transactions/interface";
+import type { StatementParserService } from "./interface";
 
 interface TextItem {
   readonly str: string;
@@ -36,45 +14,63 @@ const transactionPattern =
   /^(\d{2}\.\d{2}\.\d{4})\s+(\S+)\s+(.+?)\s+(-?[\d ]+,\d{2})\s+(-?[\d ]+,\d{2})$/;
 const dateLinePattern = /^(\d{2}\.\d{2}\.\d{4})(?:\s+(.*))?$/;
 
-export async function parsePkoStatementPdf(pdf: Uint8Array): Promise<ParsedPkoStatement> {
-  const text = await extractPdfText(pdf);
-  const lines = text
-    .split("\n")
-    .map((line) => line.replace(/\s+/g, " ").trim())
-    .filter(Boolean);
-
-  const period = requireMatch(
-    text,
-    /WYCIĄG za okres\s+(\d{2}\.\d{2}\.\d{4})\s+-\s+(\d{2}\.\d{2}\.\d{4})/,
-    "statement period",
-  );
-  const statement = requireMatch(
-    text,
-    /Nr:\s*([0-9]+\/[0-9]{4})\s+Data:\s*(\d{2}\.\d{2}\.\d{4})/,
-    "statement number",
-  );
-  const iban = requireMatch(text, /Nr IBAN:\s*([A-Z]{2}\s*\d{2}(?:\s*\d{4}){6})/, "IBAN").at(1);
-  const accountProduct = requireMatch(text, /Rodzaj rachunku:\s*([^\n]+)/, "account product").at(1);
-  const currency = requireMatch(text, /Waluta rachunku:\s*([A-Z]{3})/, "currency").at(1);
-
-  if (!iban || !accountProduct || !currency) {
-    throw new Error("Missing account fields");
-  }
-
+export function createLivePkoStatementParserService(): StatementParserService {
   return {
-    account: {
-      bankName: "PKO BP SA",
-      iban: normalizeIban(iban),
-      accountProduct: accountProduct.trim(),
-      currency,
+    async parsePkoBankStatementPdf(pdf) {
+      const text = await extractPdfText(pdf);
+      const lines = text
+        .split("\n")
+        .map((line) => line.replace(/\s+/g, " ").trim())
+        .filter(Boolean);
+
+      const period = requireMatch(
+        text,
+        /WYCIĄG za okres\s+(\d{2}\.\d{2}\.\d{4})\s+-\s+(\d{2}\.\d{2}\.\d{4})/,
+        "statement period",
+      );
+      const statement = requireMatch(
+        text,
+        /Nr:\s*([0-9]+\/[0-9]{4})\s+Data:\s*(\d{2}\.\d{2}\.\d{4})/,
+        "statement number",
+      );
+      const iban = requireMatch(text, /Nr IBAN:\s*([A-Z]{2}\s*\d{2}(?:\s*\d{4}){6})/, "IBAN").at(
+        1,
+      );
+      const accountProduct = requireMatch(text, /Rodzaj rachunku:\s*([^\n]+)/, "account product").at(
+        1,
+      );
+      const currency = requireMatch(text, /Waluta rachunku:\s*([A-Z]{3})/, "currency").at(1);
+
+      if (!iban || !accountProduct || !currency) {
+        throw new Error("Missing account fields");
+      }
+
+      return {
+        account: {
+          bankName: "PKO BP SA",
+          iban: normalizeIban(iban),
+          accountProduct: accountProduct.trim(),
+          currency,
+        },
+        statement: {
+          number: requiredGroup(statement, 1),
+          issuedAt: parsePolishDate(requiredGroup(statement, 2)),
+          periodFrom: parsePolishDate(requiredGroup(period, 1)),
+          periodTo: parsePolishDate(requiredGroup(period, 2)),
+        },
+        transactions: parseTransactions(lines),
+      };
     },
-    statement: {
-      number: requiredGroup(statement, 1),
-      issuedAt: parsePolishDate(requiredGroup(statement, 2)),
-      periodFrom: parsePolishDate(requiredGroup(period, 1)),
-      periodTo: parsePolishDate(requiredGroup(period, 2)),
+  };
+}
+
+export function createTestStatementParserService(
+  parsedStatement: ParsedBankStatement,
+): StatementParserService {
+  return {
+    async parsePkoBankStatementPdf() {
+      return parsedStatement;
     },
-    transactions: parseTransactions(lines),
   };
 }
 
@@ -86,32 +82,30 @@ async function extractPdfText(pdf: Uint8Array): Promise<string> {
   const data = new Uint8Array(pdf.byteLength);
   data.set(pdf);
   const document = await pdfjs.getDocument({ data, useWorkerFetch: false }).promise;
-  const pages: string[] = [];
+  const pages = await Promise.all(
+    Array.from({ length: document.numPages }, async (_, pageIndex) => {
+      const page = await document.getPage(pageIndex + 1);
+      const content = await page.getTextContent();
+      const rows: Array<{ y: number; items: TextItem[] }> = [];
 
-  for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
-    const page = await document.getPage(pageNumber);
-    const content = await page.getTextContent();
-    const rows: Array<{ y: number; items: TextItem[] }> = [];
+      for (const rawItem of content.items) {
+        const item = rawItem as TextItem;
+        if (!item.str.trim()) {
+          continue;
+        }
 
-    for (const rawItem of content.items) {
-      const item = rawItem as TextItem;
-      if (!item.str.trim()) {
-        continue;
+        const y = Math.round(item.transform[5] ?? 0);
+        const existingRow = rows.find((row) => Math.abs(row.y - y) <= 2);
+
+        if (existingRow) {
+          existingRow.items.push(item);
+        } else {
+          rows.push({ y, items: [item] });
+        }
       }
 
-      const y = Math.round(item.transform[5] ?? 0);
-      const existingRow = rows.find((row) => Math.abs(row.y - y) <= 2);
-
-      if (existingRow) {
-        existingRow.items.push(item);
-      } else {
-        rows.push({ y, items: [item] });
-      }
-    }
-
-    rows.sort((left, right) => right.y - left.y);
-    pages.push(
-      rows
+      rows.sort((left, right) => right.y - left.y);
+      return rows
         .map((row) =>
           row.items
             .slice()
@@ -122,9 +116,9 @@ async function extractPdfText(pdf: Uint8Array): Promise<string> {
             .trim(),
         )
         .filter(Boolean)
-        .join("\n"),
-    );
-  }
+        .join("\n");
+    }),
+  );
 
   return pages.join("\n");
 }
@@ -180,8 +174,8 @@ class MinimalImageData {
 
 class MinimalPath2D {}
 
-function parseTransactions(lines: readonly string[]): ParsedPkoTransaction[] {
-  const transactions: ParsedPkoTransaction[] = [];
+function parseTransactions(lines: readonly string[]): TransactionDetails[] {
+  const transactions: TransactionDetails[] = [];
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];

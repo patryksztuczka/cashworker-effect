@@ -15,13 +15,13 @@
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote"
   },
   "dependencies": {
-    "@effect/experimental": "^0.60.0",
     "drizzle-orm": "^0.45.2",
-    "effect": "^3.21.2",
     "hono": "^4.12.23",
-    "pdfjs-dist": "^5.7.284"
+    "pdfjs-dist": "^5.7.284",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.16.10",
     "@cloudflare/workers-types": "^4.20260525.0",
     "drizzle-kit": "^0.31.10",
     "typescript": "^6.0.3",

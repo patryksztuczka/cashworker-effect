@@ -1,4 +1,4 @@
-import app from "../src/index";
+import app from "./index";
 
 describe("backend app", () => {
   it("returns text from the root route", async () => {
@@ -8,8 +8,8 @@ describe("backend app", () => {
     await expect(response.text()).resolves.toBe("cashworker backend");
   });
 
-  it("runs the health route through Effect", async () => {
-    const response = await app.request("/health");
+  it("returns backend health status", async () => {
+    const response = await app.request("/api/v1/health");
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
