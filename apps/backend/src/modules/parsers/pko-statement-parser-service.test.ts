@@ -1,14 +1,19 @@
 import { readFile } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
-import { parsePkoStatementPdf } from "../src/statements/pko-parser";
+import { createLivePkoStatementParserService } from "./pko-statement-parser-service";
+
+const pkoStatementPdfUrl = new URL(
+  "../../../../../docs/Wyciag_1_50102040270000110221038296_20260212662989201.pdf",
+  import.meta.url,
+);
+const pkoStatementPdfPath = fileURLToPath(pkoStatementPdfUrl.href);
 
 describe("PKO statement parser", () => {
   it("extracts account, statement metadata, and transactions from a real PKO PDF", async () => {
-    const pdf = await readFile(
-      "../../docs/Wyciag_1_50102040270000110221038296_20260212662989201.pdf",
-    );
+    const pdf = await readFile(pkoStatementPdfPath);
 
-    const statement = await parsePkoStatementPdf(pdf);
+    const statement = await createLivePkoStatementParserService().parsePkoBankStatementPdf(pdf);
 
     expect(statement.account).toEqual({
       bankName: "PKO BP SA",

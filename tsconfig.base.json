@@ -10,11 +10,6 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "plugins": [
-      {
-        "name": "@effect/language-service"
-      }
-    ]
+    "forceConsistentCasingInFileNames": true
   }
 }
