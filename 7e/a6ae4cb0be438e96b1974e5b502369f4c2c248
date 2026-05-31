@@ -1,0 +1,23 @@
+apps/backend/src/modules/parsers/pko-statement-parser-service.ts
+  s_2c1fcc7955e9ae::t_91a8ef5827ddf7 36-41
+apps/backend/src/modules/bank-accounts/bank-account-service.ts
+  s_2c1fcc7955e9ae::t_91a8ef5827ddf7 28
+apps/backend/tsconfig.json
+  s_2c1fcc7955e9ae::t_91a8ef5827ddf7 4-8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "7ea6ae4cb0be438e96b1974e5b502369f4c2c248",
+  "prompts": {},
+  "sessions": {
+    "s_2c1fcc7955e9ae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e7d03-45fd-7171-b418-4723b9faa185",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Patryk Sztuczka <patryk.sztuczka00@gmail.com>"
+    }
+  }
+}
