@@ -1,0 +1,21 @@
+apps/web/src/routes/home.test.tsx
+  s_391e84f3b5480b::t_60b55b344178f8 2,10-31,41,56,72,92,101-159
+apps/web/src/routes/home.tsx
+  s_391e84f3b5480b::t_60b55b344178f8 57-62,77,82,85-91,97-110,119,123,136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "97c23655cc4d66fe2deacd0eb668a94f779bc6b7",
+  "prompts": {},
+  "sessions": {
+    "s_391e84f3b5480b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e7f78-28b3-71c0-beb7-fa1c35377b5a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Patryk Sztuczka <patryk.sztuczka00@gmail.com>"
+    }
+  }
+}
