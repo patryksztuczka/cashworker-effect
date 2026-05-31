@@ -17,7 +17,7 @@ describe("PKO statement parser", () => {
 
     expect(statement.account).toEqual({
       bankName: "PKO BP SA",
-      iban: "PL50102040270000110221038296",
+      iban: "PL00102000000000000000000000",
       accountProduct: "PKO KONTO ZA ZERO",
       currency: "PLN",
     });
@@ -46,6 +46,6 @@ describe("PKO statement parser", () => {
       amountMinor: 50_000,
       balanceAfterMinor: 50_000,
     });
-    expect(incomingTransfer.description).toContain("KAROLINA ZUZANNA MACIEJEWSKA");
+    expect(incomingTransfer.description).toContain("ANNA MARIA NOWAK");
   });
 });
