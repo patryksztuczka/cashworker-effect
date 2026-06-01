@@ -27,6 +27,13 @@ CREATE TABLE `statement_imports` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `statement_imports_user_file_hash_idx` ON `statement_imports` (`user_id`,`file_hash`);--> statement-breakpoint
 CREATE UNIQUE INDEX `statement_imports_account_statement_idx` ON `statement_imports` (`bank_account_id`,`statement_number`,`issued_at`);--> statement-breakpoint
+CREATE TABLE `todos` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`title` text NOT NULL,
+	`completed` integer DEFAULT false NOT NULL,
+	`created_at` integer NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `transactions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
