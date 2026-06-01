@@ -67,10 +67,7 @@
       "indexes": {
         "bank_accounts_user_iban_idx": {
           "name": "bank_accounts_user_iban_idx",
-          "columns": [
-            "user_id",
-            "iban"
-          ],
+          "columns": ["user_id", "iban"],
           "isUnique": true
         }
       },
@@ -170,19 +167,12 @@
       "indexes": {
         "statement_imports_user_file_hash_idx": {
           "name": "statement_imports_user_file_hash_idx",
-          "columns": [
-            "user_id",
-            "file_hash"
-          ],
+          "columns": ["user_id", "file_hash"],
           "isUnique": true
         },
         "statement_imports_account_statement_idx": {
           "name": "statement_imports_account_statement_idx",
-          "columns": [
-            "bank_account_id",
-            "statement_number",
-            "issued_at"
-          ],
+          "columns": ["bank_account_id", "statement_number", "issued_at"],
           "isUnique": true
         }
       },
@@ -321,10 +311,7 @@
       "indexes": {
         "transactions_account_operation_idx": {
           "name": "transactions_account_operation_idx",
-          "columns": [
-            "bank_account_id",
-            "operation_id"
-          ],
+          "columns": ["bank_account_id", "operation_id"],
           "isUnique": true
         }
       },
